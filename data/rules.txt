@@ -1,4 +1,4 @@
-aaaa -> abca
+aaaa ->
 bbbb -> bcab
 cabc -> cccc
 aaa -> abc
