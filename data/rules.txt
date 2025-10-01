@@ -1,0 +1,7 @@
+aaaa -> abca
+bbbb -> bcab
+cabc -> cccc
+aaa -> abc
+abc -> bbb
+abc -> ccc
+aabbcc -> abcabc
