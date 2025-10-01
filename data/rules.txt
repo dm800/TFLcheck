@@ -1,7 +1,9 @@
-aaaa ->
+aaaa -> abca
 bbbb -> bcab
 cabc -> cccc
 aaa -> abc
 abc -> bbb
 abc -> ccc
 aabbcc -> abcabc
+# Пример комментария.
+# Учитывайте, что при добавлении новых правил комментарии отсюда удаляются

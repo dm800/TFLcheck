@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <complex>
 #include <fstream>
-#define LENGTH 3
 
 std::map<int, std::string> letters = {
     {0, "c"},
@@ -14,6 +13,7 @@ std::map<int, std::string> letters = {
 };
 
 int ss = letters.size();
+int len = 0;
 
 std::vector<std::string> rulesleft = {};
 
@@ -21,8 +21,44 @@ std::vector<std::string> rulesright = {};
 
 auto llo = [](const std::string& a, const std::string& b){
     if (a.size() != b.size()) return a.size() < b.size();
-    return a < b;
+    return a > b;
 };
+
+
+void parse_rules() {
+    std::ifstream rules("data/rules.txt");
+    std::string rule;
+    while (std::getline(rules, rule)) {
+        if (rule[0] == '#') {
+            continue;
+        }
+        int index = rule.find(" -> ");
+        std::string left = rule.substr(0, index);
+        std::string right = rule.substr(index + 4, std::string::npos);
+        rulesleft.push_back(left);
+        rulesright.push_back(right);
+    }
+    rules.close();
+}
+
+void parse_letters() {
+    std::ifstream alphabet("data/alphabet.txt");
+    std::string letter;
+    std::vector<std::string> all = {};
+    std::getline(alphabet, letter);
+    len = std::atoi(letter.c_str());
+    while (std::getline(alphabet, letter)) {
+        if (letter[0] == '#') {
+            continue;
+        }
+        all.push_back(letter);
+    }
+    std::sort(all.begin(), all.end(), llo);
+    for (int i = 0; i < all.size(); i++) {
+        letters[i] = all[i];
+    }
+    alphabet.close();
+}
 
 std::string generate(int n, int len) {
     if (len == 0) {
@@ -75,17 +111,8 @@ std::vector<std::string> normals(const std::string& starting, std::vector<std::s
 
 
 int main() {
-    std::ifstream rules("data/rules.txt");
-    std::string rule;
-    while (std::getline(rules, rule)) {
-        int index = rule.find(" -> ");
-        std::string left = rule.substr(0, index);
-        std::string right = rule.substr(index + 4, std::string::npos);
-        rulesleft.push_back(left);
-        rulesright.push_back(right);
-    }
-    rules.close();
-    int len = LENGTH;
+    parse_rules();
+    parse_letters();
     size_t count = 0;
     std::map<std::string, std::string> to_add = {};
     for (int i = 0; i < std::pow(3, len); i++) {
@@ -105,7 +132,7 @@ int main() {
             std::sort(normforms.begin(), normforms.end(), llo);
             if (normforms.size() >= 2) {
                 for (size_t k = 0; k + 1 < normforms.size(); k++) {
-                    to_add[normforms[k]] = normforms[k + 1];
+                    to_add[normforms[k + 1]] = normforms[k];
                 }
             }
         }
