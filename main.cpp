@@ -7,12 +7,9 @@
 #include <fstream>
 
 std::map<int, std::string> letters = {
-    {0, "c"},
-    {1, "b"},
-    {2, "a"}
 };
 
-int ss = letters.size();
+int ss = 0;
 int len = 0;
 
 std::vector<std::string> rulesleft = {};
@@ -21,7 +18,7 @@ std::vector<std::string> rulesright = {};
 
 auto llo = [](const std::string& a, const std::string& b){
     if (a.size() != b.size()) return a.size() < b.size();
-    return a > b;
+    return a < b;
 };
 
 
@@ -62,6 +59,7 @@ void parse_letters() {
         letters[i] = all[i];
     }
     alphabet.close();
+    ss = letters.size();
 }
 
 std::string generate(int n, int len) {
