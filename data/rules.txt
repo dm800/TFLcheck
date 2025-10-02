@@ -5,5 +5,9 @@ aaa -> abc
 abc -> bbb
 abc -> ccc
 aabbcc -> abcabc
-# Пример комментария.
-# Учитывайте, что при добавлении новых правил комментарии отсюда удаляются
+bbb -> ccc
+accc -> ccca
+bcab -> bccc
+bccc -> cccb
+cccaa -> cccbc
+cccab -> ccccc

@@ -28,8 +28,12 @@ auto llo = [](const std::string& a, const std::string& b){
 void parse_rules() {
     std::ifstream rules("data/rules.txt");
     std::string rule;
+    rulesleft.clear();
+    rulesright.clear();
     while (std::getline(rules, rule)) {
         if (rule[0] == '#') {
+            continue;
+        } if (rule.empty()) {
             continue;
         }
         int index = rule.find(" -> ");
@@ -111,56 +115,84 @@ std::vector<std::string> normals(const std::string& starting, std::vector<std::s
 
 
 int main() {
-    parse_rules();
     parse_letters();
+    parse_rules();
     size_t count = 0;
+    int iter_count = 0;
     std::map<std::string, std::string> to_add = {};
-    for (int i = 0; i < std::pow(3, len); i++) {
-        std::string generated = generate(i, len);
-        stories = {};
-        std::vector<std::string> normforms = normals(generated, {});
-        if (normforms.size() != 1) {
-            count++;
-            std::cout << generated << " has some problems: \n";
-            for (const auto& story : stories) {
-                std::cout << story.first << ": ";
-                for (const auto& str : story.second) {
-                    std::cout << str << " >> ";
+    while (true) {
+        iter_count++;
+        for (int i = 0; i < std::pow(3, len); i++) {
+            std::string generated = generate(i, len);
+            stories = {};
+            std::vector<std::string> normforms = normals(generated, {});
+            if (normforms.size() != 1) {
+                count++;
+                std::cout << generated << " has some problems: \n";
+                for (const auto& story : stories) {
+                    std::cout << story.first << ": ";
+                    for (const auto& str : story.second) {
+                        std::cout << str << " >> ";
+                    }
+                    std::cout << "END" << std::endl;
                 }
-                std::cout << "END" << std::endl;
+                std::sort(normforms.begin(), normforms.end(), llo);
+                if (normforms.size() >= 2) {
+                    for (size_t k = 0; k + 1 < normforms.size(); k++) {
+                        to_add[normforms[k + 1]] = normforms[k];
+                    }
+                }
             }
-            std::sort(normforms.begin(), normforms.end(), llo);
-            if (normforms.size() >= 2) {
-                for (size_t k = 0; k + 1 < normforms.size(); k++) {
-                    to_add[normforms[k + 1]] = normforms[k];
-                }
+            else {
+                std::cout << generated << " is clear (" << generated << " -> " << normforms[0] << ")" << std::endl;
             }
         }
-        else {
-            std::cout << generated << " is clear (" << generated << " -> " << normforms[0] << ")" << std::endl;
+        if (count == 0) {
+            std::cout << "cool stuff\n";
+            break;
         }
-    }
-    if (count == 0) {
-        std::cout << "cool stuff\n";
-    } else {
         std::cout << "add rules bro\n";
         for (const auto& pairs : to_add) {
             std::cout << pairs.first << " -> " << pairs.second << std::endl;
         }
-        std::cout << "add automatically? (not reliable now, not recommended)\n";
-        std::string answer;
-        std::cin >> answer;
-        if (answer == "Y" || answer == "Yes" || answer == "yes" || answer == "y") {
-            std::ofstream rulesout("data/rules.txt");
-            for (int i = 0; i < rulesleft.size(); i++) {
-                rulesout << rulesleft[i] << " -> " << rulesright[i] << std::endl;
+        if (iter_count == 1) {
+            std::string answer;
+            while (answer != "fast" && answer != "slow" && answer != "skip") {
+                std::cout << "add automatically? (fast/slow/skip)\n";
+                std::cin >> answer;
             }
-            for (const auto& pairs : to_add) {
-                rulesout << pairs.first << " -> " << pairs.second << std::endl;
+            if (answer == "fast") {
+                std::ofstream rulesout("data/rules.txt");
+                for (int i = 0; i < rulesleft.size(); i++) {
+                    rulesout << rulesleft[i] << " -> " << rulesright[i] << std::endl;
+                }
+                for (const auto& pairs : to_add) {
+                    rulesout << pairs.first << " -> " << pairs.second << std::endl;
+                }
+                std::cout << "done\n";
+                rulesout.close();
+                break;
             }
-            std::cout << "done\n";
-            rulesout.close();
+            if (answer != "slow") {
+                std::cout << "done";
+                break;
+            }
         }
+        if (to_add.empty()) {
+            break;
+        }
+        std::ofstream rulesout("data/rules.txt");
+        for (int i = 0; i < rulesleft.size(); i++) {
+            rulesout << rulesleft[i] << " -> " << rulesright[i] << std::endl;
+        }
+        std::pair<std::string, std::string> firstrule = *to_add.begin();
+        rulesout << firstrule.first << " -> " << firstrule.second << std::endl;
+        rulesout.close();
+        std::cout << firstrule.first << " -> " << firstrule.second << " added" << std::endl;
+        std::cout << "completed iteration " << iter_count << std::endl;
+        parse_rules();
+        to_add.clear();
+        count = 0;
     }
     return 0;
 }
