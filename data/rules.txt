@@ -5,11 +5,5 @@ abc -> aaa
 bbb -> abc
 ccc -> abc
 abcabc -> aabbcc
-baaa -> aaab
-caaa -> aaac
-aaacc -> aaaab
-aaabab -> aaaaac
-aaabbc -> aaabaa
-aaacab -> aaaaaa
-aaacbc -> aaacaa
-aabbcc -> aaaaaa
+# Имеджин, я забыл что такое LLO и все версии до этого изначальная ТРС для примера была неверной.
+# Теперь всё правильно (надеюсь). Напоминаю - это всё ещё комментарий, удалится при переписывании файла.

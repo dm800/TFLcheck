@@ -6,8 +6,7 @@
 #include <complex>
 #include <fstream>
 
-std::map<int, std::string> letters = {
-};
+std::map<int, std::string> letters = {};
 
 int ss = 0;
 int len = 0;
@@ -138,7 +137,7 @@ int main() {
     while (!error && len <= autlen) {
         while (true) {
             iter_count++;
-            for (int i = 0; i < std::pow(3, len); i++) {
+            for (int i = 0; i < std::pow(ss, len); i++) {
                 std::string generated = generate(i, len);
                 stories = {};
                 std::vector<std::string> normforms = normals(generated, {});

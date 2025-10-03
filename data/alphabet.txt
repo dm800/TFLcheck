@@ -1,4 +1,4 @@
-auto 6
+auto 8
 a
 b
 c
