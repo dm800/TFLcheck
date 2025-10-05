@@ -130,13 +130,29 @@ std::vector<std::string> normals(const std::string& starting, std::vector<std::s
     return norms;
 }
 
+void optimize_rules() {
+    size_t size = rulesleft.size();
+    for (int i = 0; i < size; i++) {
+        std::string starting = rulesleft[i];
+        std::string left = rulesleft[i];
+        std::string right = rulesright[i];
+        rulesleft.erase(rulesleft.begin() + i);
+        rulesright.erase(rulesright.begin() + i);
+        std::vector<std::string> normforms = normals(starting, {});
+        if (!std::ranges::contains(normforms, right)) {
+            rulesleft.emplace(rulesleft.begin() + i, left);
+            rulesright.emplace(rulesright.begin() + i, right);
+        } else {
+            size--;
+        }
+    }
+}
+
 
 int main() {
     parse_letters();
     parse_rules();
-    for (int i = 0; i < rulesleft.size(); i++) {
-        std::cout << rulesleft[i] << " -> " << rulesright[i] << std::endl;
-    }
+    optimize_rules();
     size_t count = 0;
     int iter_count = 0;
     std::map<std::string, std::string> to_add = {};
@@ -227,6 +243,7 @@ int main() {
             std::cout << firstrule.first << " -> " << firstrule.second << " added" << std::endl;
             std::cout << "completed iteration " << iter_count << std::endl;
             parse_rules();
+            optimize_rules();
             to_add.clear();
             count = 0;
         }
