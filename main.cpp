@@ -6,9 +6,9 @@
 #include <complex>
 #include <fstream>
 
-std::map<int, std::string> letters = {};
+std::map<size_t, std::string> letters = {};
 
-int ss = 0;
+size_t ss = 0;
 int len = 0;
 bool aut = false;
 int autlen = 0;
@@ -35,9 +35,12 @@ void parse_rules() {
         } if (rule.empty()) {
             continue;
         }
-        int index = rule.find(" -> ");
+        size_t index = rule.find(" -> ");
         std::string left = rule.substr(0, index);
         std::string right = rule.substr(index + 4, std::string::npos);
+        if (right == ".") {
+            right = "";
+        }
         rulesleft.push_back(left);
         rulesright.push_back(right);
     }
@@ -59,7 +62,7 @@ void parse_letters() {
             len = std::stoi(letter);
             autlen = len;
         }
-    } catch (std::invalid_argument e) {
+    } catch (std::invalid_argument&) {
         std::cout << "first line of data/alphabet.txt should be either a number or 'auto N', where N is a number\n";
         error = true;
         return;
@@ -78,15 +81,15 @@ void parse_letters() {
     ss = letters.size();
 }
 
-std::string generate(int n, int len) {
-    if (len == 0) {
+std::string generate(size_t n, int length) {
+    if (length == 0) {
         return "";
     }
-    return generate(n / ss, len - 1) + letters[n % ss];
+    return generate(n / ss, length - 1) + letters[n % ss];
 }
 
-std::vector<int> find_subs(const std::string& src, const std::string& pat) {
-    std::vector<int> result = {};
+std::vector<size_t> find_subs(const std::string& src, const std::string& pat) {
+    std::vector<size_t> result = {};
     size_t ind = src.find(pat);
     while (ind != std::string::npos) {
         result.push_back(ind);
@@ -104,7 +107,7 @@ std::vector<std::string> normals(const std::string& starting, std::vector<std::s
     bool found = false;
     for (int rulesind = 0; rulesind != rulesleft.size(); rulesind++) {
         const std::string& key = rulesleft[rulesind];
-        std::vector<int> indexes = find_subs(starting, key);
+        std::vector<size_t> indexes = find_subs(starting, key);
         if (!indexes.empty()) {
             found = true;
             for (auto ind : indexes) {
@@ -131,6 +134,9 @@ std::vector<std::string> normals(const std::string& starting, std::vector<std::s
 int main() {
     parse_letters();
     parse_rules();
+    for (int i = 0; i < rulesleft.size(); i++) {
+        std::cout << rulesleft[i] << " -> " << rulesright[i] << std::endl;
+    }
     size_t count = 0;
     int iter_count = 0;
     std::map<std::string, std::string> to_add = {};
@@ -179,10 +185,20 @@ int main() {
                 if (answer == "fast") {
                     std::ofstream rulesout("data/rules.txt");
                     for (int i = 0; i < rulesleft.size(); i++) {
-                        rulesout << rulesleft[i] << " -> " << rulesright[i] << std::endl;
+                        if (!rulesright[i].empty()) {
+                            rulesout << rulesleft[i] << " -> " << rulesright[i] << std::endl;
+                        }
+                        else {
+                            rulesout << rulesleft[i] << " -> ." << std::endl;
+                        }
                     }
                     for (const auto& pairs : to_add) {
-                        rulesout << pairs.first << " -> " << pairs.second << std::endl;
+                        if (!pairs.second.empty()) {
+                            rulesout << pairs.first << " -> " << pairs.second << std::endl;
+                        }
+                        else {
+                            rulesout << pairs.first << " -> ." << std::endl;
+                        }
                     }
                     std::cout << "done\n";
                     rulesout.close();
@@ -198,7 +214,12 @@ int main() {
             }
             std::ofstream rulesout("data/rules.txt");
             for (int i = 0; i < rulesleft.size(); i++) {
-                rulesout << rulesleft[i] << " -> " << rulesright[i] << std::endl;
+                if (!rulesright[i].empty()) {
+                    rulesout << rulesleft[i] << " -> " << rulesright[i] << std::endl;
+                }
+                else {
+                    rulesout << rulesleft[i] << " -> ." << std::endl;
+                }
             }
             std::pair<std::string, std::string> firstrule = *to_add.begin();
             rulesout << firstrule.first << " -> " << firstrule.second << std::endl;

@@ -1,9 +1,19 @@
-abca -> aaaa
-bcab -> bbbb
-cccc -> cabc
-abc -> aaa
-bbb -> abc
-ccc -> abc
-abcabc -> aabbcc
-# Имеджин, я забыл что такое LLO и все версии до этого изначальная ТРС для примера была неверной.
-# Теперь всё правильно (надеюсь). Напоминаю - это всё ещё комментарий, удалится при переписывании файла.
+cb -> ba
+aaa -> aa
+aba -> ba
+cc -> ac
+baa -> ba
+bba -> ba
+bbb -> b
+bbc -> c
+bcc -> cc
+cab -> ba
+cac -> cc
+cac -> bab
+ccc -> c
+babb -> ba
+babc -> .
+cabba -> baca
+caab -> bb
+caac -> bc
+aabcaa -> a
