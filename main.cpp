@@ -6,9 +6,9 @@
 #include <complex>
 #include <fstream>
 
-std::map<int, std::string> letters = {};
+std::map<size_t, std::string> letters = {};
 
-int ss = 0;
+size_t ss = 0;
 int len = 0;
 bool aut = false;
 int autlen = 0;
@@ -35,7 +35,7 @@ void parse_rules() {
         } if (rule.empty()) {
             continue;
         }
-        int index = rule.find(" -> ");
+        size_t index = rule.find(" -> ");
         std::string left = rule.substr(0, index);
         std::string right = rule.substr(index + 4, std::string::npos);
         rulesleft.push_back(left);
@@ -59,7 +59,7 @@ void parse_letters() {
             len = std::stoi(letter);
             autlen = len;
         }
-    } catch (std::invalid_argument e) {
+    } catch (std::invalid_argument&) {
         std::cout << "first line of data/alphabet.txt should be either a number or 'auto N', where N is a number\n";
         error = true;
         return;
@@ -78,15 +78,15 @@ void parse_letters() {
     ss = letters.size();
 }
 
-std::string generate(int n, int len) {
-    if (len == 0) {
+std::string generate(size_t n, int length) {
+    if (length == 0) {
         return "";
     }
-    return generate(n / ss, len - 1) + letters[n % ss];
+    return generate(n / ss, length - 1) + letters[n % ss];
 }
 
-std::vector<int> find_subs(const std::string& src, const std::string& pat) {
-    std::vector<int> result = {};
+std::vector<size_t> find_subs(const std::string& src, const std::string& pat) {
+    std::vector<size_t> result = {};
     size_t ind = src.find(pat);
     while (ind != std::string::npos) {
         result.push_back(ind);
@@ -104,7 +104,7 @@ std::vector<std::string> normals(const std::string& starting, std::vector<std::s
     bool found = false;
     for (int rulesind = 0; rulesind != rulesleft.size(); rulesind++) {
         const std::string& key = rulesleft[rulesind];
-        std::vector<int> indexes = find_subs(starting, key);
+        std::vector<size_t> indexes = find_subs(starting, key);
         if (!indexes.empty()) {
             found = true;
             for (auto ind : indexes) {
@@ -127,10 +127,29 @@ std::vector<std::string> normals(const std::string& starting, std::vector<std::s
     return norms;
 }
 
+void optimize_rules() {
+    size_t size = rulesleft.size();
+    for (int i = 0; i < size; i++) {
+        std::string starting = rulesleft[i];
+        std::string left = rulesleft[i];
+        std::string right = rulesright[i];
+        rulesleft.erase(rulesleft.begin() + i);
+        rulesright.erase(rulesright.begin() + i);
+        std::vector<std::string> normforms = normals(starting, {});
+        if (!std::ranges::contains(normforms, right)) {
+            rulesleft.emplace(rulesleft.begin() + i, left);
+            rulesright.emplace(rulesright.begin() + i, right);
+        } else {
+            size--;
+        }
+    }
+}
+
 
 int main() {
     parse_letters();
     parse_rules();
+    optimize_rules();
     size_t count = 0;
     int iter_count = 0;
     std::map<std::string, std::string> to_add = {};
@@ -206,6 +225,7 @@ int main() {
             std::cout << firstrule.first << " -> " << firstrule.second << " added" << std::endl;
             std::cout << "completed iteration " << iter_count << std::endl;
             parse_rules();
+            optimize_rules();
             to_add.clear();
             count = 0;
         }
