@@ -24,29 +24,6 @@ auto llo = [](const std::string& a, const std::string& b){
 };
 
 
-void parse_rules() {
-    std::ifstream rules("data/rules.txt");
-    std::string rule;
-    rulesleft.clear();
-    rulesright.clear();
-    while (std::getline(rules, rule)) {
-        if (rule[0] == '#') {
-            continue;
-        } if (rule.empty()) {
-            continue;
-        }
-        size_t index = rule.find(" -> ");
-        std::string left = rule.substr(0, index);
-        std::string right = rule.substr(index + 4, std::string::npos);
-        if (right == ".") {
-            right = "";
-        }
-        rulesleft.push_back(left);
-        rulesright.push_back(right);
-    }
-    rules.close();
-}
-
 void parse_letters() {
     std::ifstream alphabet("data/alphabet.txt");
     std::string letter;
@@ -146,6 +123,40 @@ void optimize_rules() {
             size--;
         }
     }
+}
+
+void add_with_check(const std::string& left, const std::string& right) {
+    size_t size = rulesleft.size();
+    rulesleft.push_back(left);
+    rulesright.push_back(right);
+    for (int i = 0; i < size; i++) {
+        std::vector<std::string> norms = normals(rulesleft[i], {});
+        if (norms[0] != rulesright[i]) {
+            rulesright[i] = norms[0];
+        }
+    }
+}
+
+void parse_rules() {
+    std::ifstream rules("data/rules.txt");
+    std::string rule;
+    rulesleft.clear();
+    rulesright.clear();
+    while (std::getline(rules, rule)) {
+        if (rule[0] == '#') {
+            continue;
+        } if (rule.empty()) {
+            continue;
+        }
+        size_t index = rule.find(" -> ");
+        std::string left = rule.substr(0, index);
+        std::string right = rule.substr(index + 4, std::string::npos);
+        if (right == ".") {
+            right = "";
+        }
+        add_with_check(left, right);
+    }
+    rules.close();
 }
 
 
