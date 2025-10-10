@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <complex>
 #include <fstream>
+#include <unordered_map>
 
 std::map<size_t, std::string> letters = {};
 
@@ -78,7 +79,11 @@ std::vector<size_t> find_subs(const std::string& src, const std::string& pat) {
 
 std::map<std::string, std::vector<std::string>> stories = {};
 
-std::vector<std::string> normals(const std::string& starting, std::vector<std::string> story) {
+std::vector<std::string> normals(const std::string& starting, std::vector<std::string> story,
+    std::unordered_map<std::string, std::vector<std::string>> &cache) {
+    if (cache.contains(starting)) {
+        return cache[starting];
+    }
     story.push_back(starting);
     std::vector<std::string> norms = {};
     bool found = false;
@@ -91,7 +96,7 @@ std::vector<std::string> normals(const std::string& starting, std::vector<std::s
                 std::string nstr = starting;
                 nstr.replace(ind, key.size(), rulesright[rulesind]);
                 const std::vector<std::string>& nstory = story;
-                std::vector<std::string> another = normals(nstr, nstory);
+                std::vector<std::string> another = normals(nstr, nstory, cache);
                 for (const auto& elem : another) {
                     if (!std::ranges::contains(norms, elem)) {
                         norms.push_back(elem);
@@ -104,7 +109,14 @@ std::vector<std::string> normals(const std::string& starting, std::vector<std::s
         norms.push_back(starting);
         stories[story.at(story.size() - 1)] = story;
     }
+    cache[starting] = norms;
     return norms;
+}
+
+std::vector<std::string> normalizer(const std::string& starting) {
+    std::unordered_map<std::string, std::vector<std::string>> cache;
+    return normals(starting, {}, cache);
+
 }
 
 void optimize_rules() {
@@ -115,7 +127,7 @@ void optimize_rules() {
         std::string right = rulesright[i];
         rulesleft.erase(rulesleft.begin() + i);
         rulesright.erase(rulesright.begin() + i);
-        std::vector<std::string> normforms = normals(starting, {});
+        std::vector<std::string> normforms = normalizer(starting);
         if (!std::ranges::contains(normforms, right)) {
             rulesleft.emplace(rulesleft.begin() + i, left);
             rulesright.emplace(rulesright.begin() + i, right);
@@ -127,13 +139,19 @@ void optimize_rules() {
 
 void add_with_check(const std::string& left, const std::string& right) {
     size_t size = rulesleft.size();
-    rulesleft.push_back(left);
-    rulesright.push_back(right);
-    for (int i = 0; i < size; i++) {
-        std::vector<std::string> norms = normals(rulesleft[i], {});
-        if (norms[0] != rulesright[i]) {
-            rulesright[i] = norms[0];
-        }
+    if (size == 0) {
+        rulesleft.push_back(left);
+        rulesright.push_back(right);
+        return;
+    }
+    std::vector<std::string> normsl = normalizer(left);
+    std::vector<std::string> normsr = normalizer(right);
+    if (llo(normsl[0], normsr[0])) {
+        rulesleft.push_back(normsr[0]);
+        rulesright.push_back(normsl[0]);
+    } else {
+        rulesleft.push_back(normsl[0]);
+        rulesright.push_back(normsr[0]);
     }
 }
 
@@ -173,7 +191,7 @@ int main() {
             for (int i = 0; i < std::pow(ss, len); i++) {
                 std::string generated = generate(i, len);
                 stories = {};
-                std::vector<std::string> normforms = normals(generated, {});
+                std::vector<std::string> normforms = normalizer(generated);
                 if (normforms.size() != 1) {
                     count++;
                     std::cout << generated << " has some problems: \n";
@@ -260,5 +278,6 @@ int main() {
         }
         len++;
     }
+
     return 0;
 }
